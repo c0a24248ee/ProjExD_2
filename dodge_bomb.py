@@ -59,6 +59,24 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
         bb_accs.append(10*r)
     return bb_imags, bb_accs
 
+def get_kk_img(sum_mv: tuple[int, int]) -> pg.Surface:
+    """
+    こうかとんの画像を取得する関数
+    引数：移動量のタプル
+    戻り値：こうかとんの画像Surface
+    """
+    kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
+    if sum_mv[0] == 0 and sum_mv[1] == 0: #移動量がゼロなら
+        return kk_img #そのままの画像を返す
+    elif sum_mv[0] > 0: #右方向に移動しているなら
+        return pg.transform.flip(kk_img, True, False) #画像を左右反転して返す
+    elif sum_mv[0] < 0: #左方向に移動しているなら
+        return kk_img #そのままの画像を返す
+    elif sum_mv[1] > 0: #下方向に移動しているなら
+        return pg.transform.rotate(kk_img, -90) #画像を90度回転して返す
+    elif sum_mv[1] < 0: #上方向に移動しているなら
+        return pg.transform.rotate(kk_img, 90) #画像を-90度回転して返す 
+
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -81,9 +99,9 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT: 
                 return
-        if kk_rct.colliderect(bb_rct): #こうかとんRectと爆弾rectの衝突判定
-            gameover(screen)
-            return
+        #if kk_rct.colliderect(bb_rct): #こうかとんRectと爆弾rectの衝突判定
+            #gameover(screen)
+            #return
         screen.blit(bg_img, [0, 0]) 
 
         key_lst = pg.key.get_pressed()
@@ -101,6 +119,9 @@ def main():
         #if key_lst[pg.K_RIGHT]:
         #    sum_mv[0] += 5
         kk_rct.move_ip(sum_mv)
+        kk_img = get_kk_img((0, 0))
+        kk_img = get_kk_img(tuple(sum_mv))
+
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1]) #移動をなかったことにする
         screen.blit(kk_img, kk_rct) 
@@ -111,7 +132,6 @@ def main():
         bb_img = bb_imgs[min(tmr//500, 9)] #爆弾の画像を更新
         bb_rct.move_ip(avx, avy) #爆弾の移動
         bb_rct.move_ip(vx,vy) #爆弾の移動
-
 
         yoko,tate = check_bound(bb_rct)
         if not yoko: #横方向にはみ出ていたら
