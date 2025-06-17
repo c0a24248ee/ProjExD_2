@@ -26,6 +26,11 @@ def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
     return yoko, tate #横方向、縦方向の画面内判定結果を返す
 
 def gameover(screen: pg.Surface) -> None:
+    """
+    ゲームオーバー画面を表示する関数
+    引数：画面Surface
+    戻り値：なし
+    """
     black = pg.Surface((WIDTH, HEIGHT)) #黒いSurfaceを生成
     pg.draw.rect(black, (0, 0, 0), (0, 0, WIDTH, HEIGHT)) #黒色で塗りつぶす
     black.set_alpha(200) #透明度を設定
@@ -38,6 +43,21 @@ def gameover(screen: pg.Surface) -> None:
     screen.blit(kk2_img, (730, 290)) #画面にこうかとん画像を描画
     pg.display.update() #画面更新
     time.sleep(5) #5秒待つ
+
+def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    """
+    爆弾の画像を初期化する関数
+    戻り値：爆弾画像のリスト、爆弾の半径のリスト
+    """
+    bb_imags = [] #爆弾画像のリスト
+    bb_accs = [a for a in range(1, 11)] #爆弾の半径のリスト
+    for r in range(1, 11):
+        bb_img = pg.Surface((20*r, 20*r)) #空のSurfaceを作る（爆弾用）
+        pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r) # 赤い円を描く
+        bb_img.set_colorkey((0, 0, 0)) # 黒色を透明色に設定
+        bb_imags.append(bb_img)
+        bb_accs.append(10*r)
+    return bb_imags, bb_accs
 
 
 def main():
@@ -83,8 +103,16 @@ def main():
         kk_rct.move_ip(sum_mv)
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1]) #移動をなかったことにする
-        screen.blit(kk_img, kk_rct)
+        screen.blit(kk_img, kk_rct) 
+        
+        bb_imgs, bb_accs = init_bb_imgs() #爆弾の画像と半径を初期化
+        avx = vx*bb_accs[min(tmr//500, 9)] #爆弾の横方向の加速度
+        avy = vy*bb_accs[min(tmr//500, 9)] #爆弾の縦方向の加速度
+        bb_img = bb_imgs[min(tmr//500, 9)] #爆弾の画像を更新
+        bb_rct.move_ip(avx, avy) #爆弾の移動
         bb_rct.move_ip(vx,vy) #爆弾の移動
+
+
         yoko,tate = check_bound(bb_rct)
         if not yoko: #横方向にはみ出ていたら
             vx *= -1
