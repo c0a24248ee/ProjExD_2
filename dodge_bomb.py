@@ -17,7 +17,8 @@ def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
     """
     引数：こうかとんRectまたはばくだんRect
     戻り値：横方向、縦方向の画面内判定結果
-    画面内ならTrue, 画面外ならFalse"""
+    画面内ならTrue, 画面外ならFalse
+    """
     yoko, tate = True, True #初期値は画面の中
     if rct.left < 0 or WIDTH < rct.right: #横方向の画面外判定
         yoko = False
@@ -73,9 +74,9 @@ def get_kk_img(sum_mv: tuple[int, int]) -> pg.Surface:
     elif sum_mv[0] < 0: #左方向に移動しているなら
         return kk_img #そのままの画像を返す
     elif sum_mv[1] > 0: #下方向に移動しているなら
-        return pg.transform.rotate(kk_img, -90) #画像を90度回転して返す
+        return pg.transform.rotate(kk_img, 90) #画像を90度回転して返す
     elif sum_mv[1] < 0: #上方向に移動しているなら
-        return pg.transform.rotate(kk_img, 90) #画像を-90度回転して返す 
+        return pg.transform.rotate(kk_img, -90) #画像を-90度回転して返す 
 
 
 def main():
@@ -99,9 +100,9 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT: 
                 return
-        #if kk_rct.colliderect(bb_rct): #こうかとんRectと爆弾rectの衝突判定
-            #gameover(screen)
-            #return
+        if kk_rct.colliderect(bb_rct): #こうかとんRectと爆弾rectの衝突判定
+            gameover(screen)
+            return
         screen.blit(bg_img, [0, 0]) 
 
         key_lst = pg.key.get_pressed()
